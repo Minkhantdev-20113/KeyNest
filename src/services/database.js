@@ -18,7 +18,13 @@ function keysCollection(uid) {
 
 function normalizeKey(snapshot) {
   const data = snapshot.data();
-  return { ...data, id: snapshot.id };
+  const normalizeTimestamp = (value) => value?.toDate?.().toISOString() || value;
+  return {
+    ...data,
+    id: snapshot.id,
+    createdAt: normalizeTimestamp(data.createdAt),
+    updatedAt: normalizeTimestamp(data.updatedAt),
+  };
 }
 
 export async function getAllKeys(uid) {
