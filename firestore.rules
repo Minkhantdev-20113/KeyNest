@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/profile/{profileId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId
+        && profileId == 'settings'
+        && request.resource.data.username is string
+        && request.resource.data.avatar.text is string
+        && request.resource.data.avatar.text.size() <= 2
+        && request.resource.data.avatar.color is string;
+    }
+
+    match /users/{userId}/keys/{keyId} {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.provider is string
+        && request.resource.data.apiKey is string
+        && request.resource.data.apiKey.size() > 0
+        && request.resource.data.apiKey.size() <= 4096
+        && request.resource.data.label is string
+        && request.resource.data.description is string
+        && request.resource.data.environment in ['production', 'development', 'staging', 'other'];
+    }
+  }
+}
